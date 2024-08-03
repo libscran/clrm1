@@ -31,10 +31,24 @@ Perhaps we should consider defining $`f(z_i) = \exp(z_i) - 1`$ for the sake of s
 The size factor would then be $`\sqrt[n]{\prod_t (y_{it} + 1)} - 1`$, which we call the "CLRm1" size factor.
 
 Despite its rather _ad hoc_ derivation, the CLRm1 approach works quite well.
+In a simulation with all-background counts, the CLRm1 size factors accurately reflect the true biases,
+with deviation comparable to the optimal estimate (i.e., the sum of Poisson-distributed counts).
 
-INSERT GRAPH HERE.
+![No background](simulations/results/bg_only.png)
 
-Let's try to rationalize this behavior by considering two cells $k$ and $k'$ that only differ in their counts by some scaling factor $a$. 
+Let's randomly choose a single tag for each cell and increase its abundance by 100-fold, to introduce some composition biases.
+CLRm1's performance advantage over the standard approach is still present:
+
+![Single tag](simulations/results/one_tag.png)
+
+We add even more composition biases by randomly choosing 0, 1 or 2 tags for each cell and increasing their abundance by 100-fold.
+We continue to observe a performance improvement for CLRm1, albeit reduced:
+
+![Multiple tags](simulations/results/multi2_tag.png)
+
+## Rationalizing the performance
+
+Considering two cells $k$ and $k'$ that only differ in their counts by some scaling factor $a$. 
 The ideal normalization method would produce a size factor for $k'$ that is $a$-fold larger than that of $k$,
 thus eliminating the scaling difference between the two cells.
 
@@ -51,8 +65,24 @@ thus eliminating the scaling difference between the two cells.
   which again cancels out to $a$.
 
 This analysis suggests that our approach will deteriorate when $`y_{kt}`$ is highly variable with at least one small/zero value.
+Indeed, we see poor performance for a simulation with highly variable background counts:
+
+![Variable background](simulations/results/bg_variable.png)
+
 Our hope is that this does not happen too frequently in real data, as there should not be large fluctuations in the ambient concentrations of different tags.
-Of course, differentially abundant tags will also introduce variation in $`y_{kt}`$ but some loss of accuracy is to be expected from composition bias.
+At the very least, users can eliminate unnecessary variability by removing uninformative all-zero rows from the count matrix before using CLRm1.
+Perhaps even more protection could be gained by trimming away the tags with the most extreme average abundances across all cells,
+though this must be weighed against the loss of precision of the size factor estimates when the number of tags is decreased.
+
+Of course, differentially abundant tags will also introduce variation in $`y_{kt}`$.
+Both the standard method and CLRm1 perform poorly in a simulation with many (up to 10) differentially abundant tags:
+
+![Even more tags](simulations/results/multi10_tag.png)
+
+This is not surprising as some loss of accuracy is to be expected from composition bias.
+Indeed, this demonstrates the fundamental weakness of geometric mean-based methods - 
+the composition bias is only mitigated without any attempt to explicitly ignore or remove it à la robust ratio-based methods like **DESeq** normalization or **edgeR**'s TMM.
+Unfortunately, the latter are difficult to implement with sparse data, and the workarounds to reduce sparsity are tedious, e.g., pre-clustering or deconvolution (Lun et al., 2015).
 
 ## References
 
@@ -60,6 +90,10 @@ Stoeckius M, Hafemeister C, Stephenson W, et al. (2017).
 Simultaneous epitope and transcriptome measurement in single cells.
 _Nature Methods_ 14, 865-868.
 
-Rodin (2014).
+Rodin B (2014).
 Variance and the Inequality of Arithmetic and Geometric Means.
 _arXiv_ doi:10.48550/arXiv.1409.0162.
+
+Lun ATL, Bach K, Marioni JC (2016).
+Pooling across cells to normalize single-cell RNA sequencing data with many zero counts.
+_Genome Biology_ 17, 75.
