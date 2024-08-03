@@ -6,17 +6,17 @@ Most workflows for scaling normalization of ADT data use the geometric mean as t
 This is a simple and pragmatic solution to the problem of composition biases introduced by a minority of high-abundance tags.
 
 Consider a cell $i$ with $n$ tags where the count for tag $t$ is $`y_{it}`$.
-Assume we have another cell $j$ with the same counts as $i$ except for one tag $t'$, where $`y_{jt'} = fy_{it'}`$ for $f \gg 1$.
+Assume we have another cell $j$ with the same counts as $i$ except for one tag $t'$, where $`y_{jt'} = by_{it'}`$ for $b \gg 1$.
 If we use the total count as the size factor for each cell (i.e., $`\sum_t y_{it}`$),
-the ratio of the size factors between $i$ and $j$ is a linear function of $f$;
-this represents the composition bias introduced by the differential abundance in $l$.
-For comparison purposes, let's consider the case where all $`y_{it}`$ are equal, such that the composition bias simplifies to $`1 + (f-1)n^{-1}`$.
-In contrast, if we use the geometric mean (i.e., $`\sqrt[n]{\prod_t y_{it}}`$), the composition bias is $\sqrt[n]{f}$,
-which is always smaller than the bias of the total count-derived size factors when $f > 1$.
+the ratio of the size factors between $i$ and $j$ is a linear function of $b$;
+this represents the composition bias introduced by the differential abundance of $l$.
+For comparison purposes, let's consider the case where all $`y_{it}`$ are equal, such that the composition bias simplifies to $`1 + (b-1)n^{-1}`$.
+If we use the geometric mean (i.e., $`\sqrt[n]{\prod_t y_{it}}`$), the composition bias is instead $\sqrt[n]{b}$,
+which is always smaller than $`1 + (b-1)n^{-1}`$ when $b > 1$.
 
 An obvious issue with the geometric mean is that it is equal to zero when one or more values are zero.
 As such, we usually add a pseudo-count - typically 1 - to ensure that some information is preserved from the non-zero counts.
-(Alternatively, we could directly replace zeros with a value of 1.)
+(Alternatively, I suppose we could directly replace zeros with a value of 1, though this is rarely done as it discards the distinction between 0 and 1 in the original data.)
 This workaround introduces its own bias in the form of a fold-change from the expected value of the tag with the zero count and its pseudo-count-based replacement,
 effectively overestimating the size factor. 
 
@@ -28,27 +28,27 @@ as used by [**Seurat**](https://github.com/satijalab/seurat/blob/1549dcb3075eaea
 and [**muon**](https://github.com/scverse/muon/blob/94917d23291f329a19b3c282276c960d414319ad/muon/_prot/preproc.py#L229).
 However, attentive readers will notice that the addition of a pseudo-count means that $f()$ is not the inverse of $g()$.
 Perhaps we should consider defining $`f(z_i) = \exp(z_i) - 1`$ for the sake of symmetry.
-The size factor would then be $`\sqrt[n]{\prod_t (y_{it} + 1)} - 1`$, which we call the "CLRm1" size factor.
+Our modified size factor would then be defined as $`\sqrt[n]{\prod_t (y_{it} + 1)} - 1`$, which we call the "CLRm1" size factor.
 
-Despite its rather _ad hoc_ derivation, the CLRm1 approach works quite well.
+Despite its rather _ad hoc_ derivation, the CLRm1 approach works surprisingly well.
 In a simulation with all-background counts, the CLRm1 size factors accurately reflect the true biases,
 with deviation comparable to the optimal estimate (i.e., the sum of Poisson-distributed counts).
 
 ![No background](simulations/results/bg_only.png)
 
-Let's randomly choose a single tag for each cell and increase its abundance by 100-fold, to introduce some composition biases.
+Let's randomly choose a single tag for each cell and increase its abundance 100-fold to introduce some composition biases.
 CLRm1's performance advantage over the standard approach is still present:
 
 ![Single tag](simulations/results/one_tag.png)
 
-We add even more composition biases by randomly choosing 0, 1 or 2 tags for each cell and increasing their abundance by 100-fold.
-We continue to observe a performance improvement for CLRm1, albeit reduced:
+We add even more composition biases by randomly choosing 0, 1 or 2 tags for each cell and increasing their abundance 100-fold.
+We continue to see an improvement for CLRm1 over the standard method, albeit reduced:
 
 ![Multiple tags](simulations/results/multi2_tag.png)
 
 ## Rationalizing the performance
 
-Considering two cells $k$ and $k'$ that only differ in their counts by some scaling factor $a$. 
+Let us consider two cells $k$ and $k'$ that only differ in their counts by some scaling factor $a$. 
 The ideal normalization method would produce a size factor for $k'$ that is $a$-fold larger than that of $k$,
 thus eliminating the scaling difference between the two cells.
 
@@ -79,10 +79,13 @@ Both the standard method and CLRm1 perform poorly in a simulation with many (up 
 
 ![Even more tags](simulations/results/multi10_tag.png)
 
-This is not surprising as some loss of accuracy is to be expected from composition bias.
-Indeed, this demonstrates the fundamental weakness of geometric mean-based methods - 
+This result is not surprising as some loss of accuracy is to be expected from composition bias.
+Indeed, it demonstrates a fundamental weakness of geometric mean-based methods - 
 the composition bias is only mitigated without any attempt to explicitly ignore or remove it à la robust ratio-based methods like **DESeq** normalization or **edgeR**'s TMM.
-Unfortunately, the latter are difficult to implement with sparse data, and the workarounds to reduce sparsity are tedious, e.g., pre-clustering or deconvolution (Lun et al., 2015).
+Unfortunately, the latter are unreliable on sparse data, and the workarounds to reduce sparsity are tedious, e.g., pre-clustering or deconvolution (Lun et al., 2015).
+
+CLRm1 is appealing as it can be easily calculated with good performance in the presence of minor composition biases.
+For datasets with strong composition biases... well, at least CLRm1 isn't any worse than the standard method.
 
 ## References
 
