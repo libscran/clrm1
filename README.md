@@ -87,6 +87,15 @@ Unfortunately, the latter are unreliable on sparse data, and the workarounds to 
 CLRm1 is appealing as it can be easily calculated with good performance in the presence of minor composition biases.
 For datasets with strong composition biases... well, at least CLRm1 isn't any worse than the standard method.
 
+## Implementations
+
+The CLRm1 procedure itself is so simple that it is barely worth providing a reference implementation.
+Nonetheless, we provide some code for easy vendoring into other applications:
+
+- [Base R](https://github.com/libscran/clrm1/blob/master/package/R/clrm1.R).
+- [R with `DelayedArray` objects](https://github.com/libscran/clrm1/blob/master/package/R/clrm1.R) to avoid copies.
+- [C++](https://github.com/libscran/clrm1/blob/master/package/src/clrm1.hpp) using [**tatami**](https://github.com/tatami-inc/tatami).
+
 ## References
 
 Stoeckius M, Hafemeister C, Stephenson W, et al. (2017).

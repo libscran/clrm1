@@ -1,0 +1,16 @@
+Package: clrm1
+Version: 0.1.0
+Date: 2024-08-03
+Authors@R: person("Aaron", "Lun", role=c("aut", "cre"), email="infinite.monkeys.with.keyboards@gmail.com")
+Title: CLRm1 Example Implementation
+Description:
+    Implements the CLRm1 algorithm in both R and C++, for demonstration purposes.
+Imports:
+    Matrix,
+    beachmat
+LinkingTo:
+    Rcpp,
+    assorthead,
+    beachmat
+RoxygenNote: 7.3.2
+Encoding: UTF-8
