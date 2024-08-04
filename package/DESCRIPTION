@@ -3,10 +3,12 @@ Version: 0.1.0
 Date: 2024-08-03
 Authors@R: person("Aaron", "Lun", role=c("aut", "cre"), email="infinite.monkeys.with.keyboards@gmail.com")
 Title: CLRm1 Example Implementation
+License: MIT + file LICENSE
 Description:
     Implements the CLRm1 algorithm in both R and C++, for demonstration purposes.
 Imports:
     Matrix,
+    DelayedArray,
     beachmat
 LinkingTo:
     Rcpp,
