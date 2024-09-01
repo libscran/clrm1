@@ -22,6 +22,7 @@ namespace clrm1 {
 struct Options {
     /**
      * Number of threads to use in the calculations.
+     * This is used to set `tatami_stats::sums::Options::num_threads`.
      */
     int num_threads = 1;
 
