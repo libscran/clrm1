@@ -45,27 +45,29 @@ struct Options {
 template<typename Value_, typename Index_, typename Output_>
 void compute(const tatami::Matrix<Value_, Index_>& matrix, const Options& options, Output_* output) {
     auto ptr = tatami::wrap_shared_ptr(&matrix);
-    tatami_stats::sums::Options sopt;
-    sopt.num_threads = options.num_threads;
 
     if (options.remove_all_zero) {
-        auto sums = tatami_stats::sums::by_row(&matrix, sopt);
+        tatami_stats::counts::zero::Options czopt;
+        czopt.num_threads = options.num_threads;
+        auto num_zeros = tatami_stats::counts::zero::by_row(&matrix, czopt);
 
-        Index_ NR = matrix.nrow();
-        std::vector<int> keep;
+        Index_ NR = matrix.nrow(), NC = matrix.ncol();
+        std::vector<Index_> keep;
         for (Index_ s = 0; s < NR; ++s) {
-            if (sums[s] > 0) {
+            if (num_zeros[s] < NC) {
                 keep.push_back(s);
             }
         }
 
         if (static_cast<Index_>(keep.size()) < NR) {
             auto sub = tatami::make_DelayedSubset(std::move(ptr), std::move(keep), true);
-            ptr = sub;
+            ptr = std::move(sub);
         }
     }
 
-    auto logmat = tatami::make_DelayedUnaryIsometricOperation(std::move(ptr), tatami::DelayedUnaryIsometricLog1p<double, double>());
+    tatami_stats::sums::Options sopt;
+    sopt.num_threads = options.num_threads;
+    auto logmat = tatami::make_DelayedUnaryIsometricOperation<Output_>(std::move(ptr), tatami::DelayedUnaryIsometricLog1p<Value_, Output_>());
     tatami_stats::sums::apply(false, logmat.get(), output, sopt);
 
     Output_ denom = 1.0/(logmat->nrow());
