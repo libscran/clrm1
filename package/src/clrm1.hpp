@@ -33,6 +33,9 @@ struct Options {
 };
 
 /**
+ * Compute CLRm1 size factors for each cell in an ADT count matrix.
+ * Note that the output size factors are not centered; this should be done by the caller if the scale of the counts is to be preserved during normalization.
+ *
  * @tparam Value_ Type of the matrix value.
  * @tparam Index_ Integer type for the row/column indices.
  * @tparam Output_ Floating-point type for the output size factors.
