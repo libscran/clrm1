@@ -70,10 +70,10 @@ void compute(const tatami::Matrix<Value_, Index_>& matrix, const Options& option
 
     tatami_stats::sums::Options sopt;
     sopt.num_threads = options.num_threads;
-    auto logmat = tatami::make_DelayedUnaryIsometricOperation<Output_>(std::move(ptr), tatami::DelayedUnaryIsometricLog1p<Value_, Output_>());
-    tatami_stats::sums::apply(false, logmat.get(), output, sopt);
+    tatami::DelayedUnaryIsometricOperation<Output_, Value_, Index_> logmat(std::move(ptr), std::make_shared<tatami::DelayedUnaryIsometricLog1p<Value_, Output_, Index_> >());
+    tatami_stats::sums::apply(false, logmat, output, sopt);
 
-    Output_ denom = 1.0/(logmat->nrow());
+    Output_ denom = 1.0/(logmat.nrow());
     Index_ NC = matrix.ncol();
     for (Index_ c = 0; c < NC; ++c) {
         output[c] = std::expm1(output[c] * denom);
