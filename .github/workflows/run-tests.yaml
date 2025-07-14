@@ -1,0 +1,49 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+name: Run tests
+
+jobs:
+  build:
+    name: Run tests
+    runs-on: ubuntu-latest
+    container: bioconductor/bioconductor_docker:devel
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set directories
+      run: |
+        echo "R_PKG_DIR=${R_HOME}/site-library" >> $GITHUB_ENV
+
+    - name: Restore the package directory
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.R_PKG_DIR }}
+        key: preinstalled-packages
+
+    - name: Install dependencies
+      shell: Rscript {0}
+      run: |
+        BiocManager::install(c("DelayedArray", "Rcpp", "testthat"))
+
+    - name: Install more dependencies
+      run: |
+        git clone --depth 1 https://github.com/LTLA/assorthead assorthead-pkg
+        R CMD INSTALL assorthead-pkg
+        git clone --depth 1 https://github.com/tatami-inc/beachmat beachmat-pkg
+        R CMD INSTALL beachmat-pkg
+
+    - name: Install the test package
+      run: R CMD INSTALL package
+
+    - name: Run the tests
+      shell: Rscript {0}
+      run: |
+        setwd("package/tests")
+        testthat::test_file("testthat.R", stop_on_failure=TRUE)
