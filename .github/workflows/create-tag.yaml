@@ -18,7 +18,7 @@ jobs:
       run: |
         current=$(cat package/DESCRIPTION  | grep "Version: " | sed "s/Version: /v/")
         echo "Current version is ${current}"
-        echo "version=v${current}" >> $GITHUB_OUTPUT
+        echo "version=${current}" >> $GITHUB_OUTPUT
 
     - name: Get latest version
       id: latest

@@ -1,5 +1,5 @@
 Package: clrm1
-Version: 0.1.0
+Version: 0.2.0
 Date: 2024-08-03
 Authors@R: person("Aaron", "Lun", role=c("aut", "cre"), email="infinite.monkeys.with.keyboards@gmail.com")
 Title: CLRm1 Example Implementation
