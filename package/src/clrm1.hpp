@@ -50,11 +50,13 @@ void compute(const tatami::Matrix<Value_, Index_>& matrix, const Options& option
     auto ptr = tatami::wrap_shared_ptr(&matrix);
 
     if (options.remove_all_zero) {
-        tatami_stats::counts::zero::Options czopt;
-        czopt.num_threads = options.num_threads;
-        auto num_zeros = tatami_stats::counts::zero::by_row(&matrix, czopt);
+        const auto num_zeros = tatami_stats::counts::zero::by_row(matrix, [&]{
+            tatami_stats::counts::zero::Options czopt;
+            czopt.num_threads = options.num_threads;
+            return czopt;
+        }());
 
-        Index_ NR = matrix.nrow(), NC = matrix.ncol();
+        const Index_ NR = matrix.nrow(), NC = matrix.ncol();
         std::vector<Index_> keep;
         for (Index_ s = 0; s < NR; ++s) {
             if (num_zeros[s] < NC) {
@@ -68,13 +70,15 @@ void compute(const tatami::Matrix<Value_, Index_>& matrix, const Options& option
         }
     }
 
-    tatami_stats::sums::Options sopt;
-    sopt.num_threads = options.num_threads;
     tatami::DelayedUnaryIsometricOperation<Output_, Value_, Index_> logmat(std::move(ptr), std::make_shared<tatami::DelayedUnaryIsometricLog1p<Value_, Output_, Index_> >());
-    tatami_stats::sums::apply(false, logmat, output, sopt);
+    tatami_stats::sums::apply(false, logmat, output, [&]{
+        tatami_stats::sums::Options sopt;
+        sopt.num_threads = options.num_threads;
+        return sopt;
+    }());
 
-    Output_ denom = 1.0/(logmat.nrow());
-    Index_ NC = matrix.ncol();
+    const Output_ denom = 1.0/(logmat.nrow());
+    const Index_ NC = matrix.ncol();
     for (Index_ c = 0; c < NC; ++c) {
         output[c] = std::expm1(output[c] * denom);
     }
