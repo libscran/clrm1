@@ -34,7 +34,15 @@ struct Options {
 
 /**
  * Compute CLRm1 size factors for each cell in an ADT count matrix.
- * Note that the output size factors are not centered; this should be done by the caller if the scale of the counts is to be preserved during normalization.
+ *
+ * The centered log-ratio (CLR) method is defined, in R notation, as `exp(mean(log1p(x)))` where `x` is the vector of counts across all tags for a cell.
+ * This aims to capture any systematic fold-difference across most tags between two cells, while diluting the compositional biases introduced by the occasional upregulated tag.
+ * In the CLRm1 method, we replace `exp()` with `expm1()`, where the extra subtraction provides some symmetry and seems to improve accuracy.
+ *
+ * Note that the size factors computed by this function are not actually centered, despite the name of the method.
+ * Centering should be done manually by the caller (e.g., using `scran_norm::center_size_factors()`) to preserve the scale of the counts after scaling normalization.
+ *
+ * Tags with all-zero counts across all cells are uninformative and ignored in the calculations described above.
  *
  * @tparam Value_ Type of the matrix value.
  * @tparam Index_ Integer type for the row/column indices.

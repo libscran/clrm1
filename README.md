@@ -2,17 +2,23 @@
 
 ## Background
 
-Most workflows for scaling normalization of ADT data use the geometric mean as the size factor, based on the CLR method used by Stoeckius et al. (2017).
+Most workflows for scaling normalization of ADT data use the geometric mean as the size factor, based on the centered log-ratio (CLR) method used by Stoeckius et al. (2017).
 This is a simple and pragmatic solution to the problem of composition biases introduced by a minority of high-abundance tags.
 
 Consider a cell $i$ with $n$ tags where the count for tag $t$ is $`y_{it}`$.
-Assume we have another cell $j$ with the same counts as $i$ except for one tag $t'$, where $`y_{jt'} = by_{it'}`$ for $b \gg 1$.
+Assume we have another cell $j$ with the same counts as $i$ except for one upregulated tag $t'$ where $`y_{jt'} = by_{it'}`$ for $b \gg 1$.
 If we use the total count as the size factor for each cell (i.e., $`\sum_t y_{it}`$),
 the ratio of the size factors between $i$ and $j$ is a linear function of $b$;
 this represents the composition bias introduced by the differential abundance of $l$.
 For comparison purposes, let's consider the case where all $`y_{it}`$ are equal, such that the composition bias simplifies to $`1 + (b-1)n^{-1}`$.
 If we use the geometric mean (i.e., $`\sqrt[n]{\prod_t y_{it}}`$), the composition bias is instead $\sqrt[n]{b}$,
 which is always smaller than $`1 + (b-1)n^{-1}`$ when $b > 1$.
+
+<!---
+It's worth noting that the opposite applies when $b \ll 1$ in the example above.
+But, in most cells, we will be seeing a baseline of ambient contamination (i.e., constant $`y_{it}`$) with some strong upregulation for a few tags with genuinely high abundance.
+We probably won't be seeing a systematic decrease to zero below the ambient baseline.
+-->
 
 An obvious issue with the geometric mean is that it is equal to zero when one or more values are zero.
 As such, we usually add a pseudo-count - typically 1 - to ensure that some information is preserved from the non-zero counts.
