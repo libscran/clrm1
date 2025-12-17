@@ -58,7 +58,7 @@ void compute(const tatami::Matrix<Value_, Index_>& matrix, const Options& option
     auto ptr = tatami::wrap_shared_ptr(&matrix);
 
     if (options.remove_all_zero) {
-        const auto num_zeros = tatami_stats::counts::zero::by_row(matrix, [&]{
+        const auto num_zeros = tatami_stats::counts::zero::by_row<Index_>(matrix, [&]{
             tatami_stats::counts::zero::Options czopt;
             czopt.num_threads = options.num_threads;
             return czopt;
