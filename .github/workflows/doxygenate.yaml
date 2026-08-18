@@ -1,0 +1,36 @@
+on:
+  push:
+    branches:
+      - master
+
+name: Build documentation
+
+jobs:
+  doxygenator:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Add Pretty CSS
+      run: curl -L https://raw.githubusercontent.com/jothepro/doxygen-awesome-css/main/doxygen-awesome.css -o docs/doxygen-awesome.css 
+
+    - name: Download the tatami tagfile
+      run: curl -L https://tatami-inc.github.io/tatami/tatami.tag -o docs/tatami.tag 
+
+    - name: Sanitize math notation
+      run: |
+        cat README.md | sed "s/\\$/\\\\f$/g" > tmp.md
+        mv tmp.md README.md
+
+    - name: Doxygen Action
+      uses: mattnotmitt/doxygen-action@v1
+      with:
+        working-directory: docs/
+
+    - name: GH Pages Deployment
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages # The branch the action should deploy to.
+        folder: docs/html
+        target-folder: docs/
+        clean: true # Automatically remove deleted files from the deploy branch

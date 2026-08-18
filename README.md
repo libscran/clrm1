@@ -5,18 +5,18 @@
 Most workflows for scaling normalization of ADT data use the geometric mean as the size factor, based on the centered log-ratio (CLR) method used by Stoeckius et al. (2017).
 This is a simple and pragmatic solution to the problem of composition biases introduced by a minority of high-abundance tags.
 
-Consider a cell $i$ with $n$ tags where the count for tag $t$ is $`y_{it}`$.
-Assume we have another cell $j$ with the same counts as $i$ except for one upregulated tag $t'$ where $`y_{jt'} = by_{it'}`$ for $b \gg 1$.
-If we use the total count as the size factor for each cell (i.e., $`\sum_t y_{it}`$),
+Consider a cell $i$ with $n$ tags where the count for tag $t$ is $y_{it}$.
+Assume we have another cell $j$ with the same counts as $i$ except for one upregulated tag $t'$ where $y_{jt'} = by_{it'}$ for $b \gg 1$.
+If we use the total count as the size factor for each cell (i.e., $\sum_t y_{it}$),
 the ratio of the size factors between $i$ and $j$ is a linear function of $b$;
 this represents the composition bias introduced by the differential abundance of $l$.
-For comparison purposes, let's consider the case where all $`y_{it}`$ are equal, such that the composition bias simplifies to $`1 + (b-1)n^{-1}`$.
-If we use the geometric mean (i.e., $`\sqrt[n]{\prod_t y_{it}}`$), the composition bias is instead $\sqrt[n]{b}$,
-which is always smaller than $`1 + (b-1)n^{-1}`$ when $b > 1$.
+For comparison purposes, let's consider the case where all $y_{it}$ are equal, such that the composition bias simplifies to $1 + (b-1)n^{-1}$.
+If we use the geometric mean (i.e., $\sqrt[n]{\prod_t y_{it}}$), the composition bias is instead $\sqrt[n]{b}$,
+which is always smaller than $1 + (b-1)n^{-1}$ when $b > 1$.
 
 <!---
 It's worth noting that the opposite applies when $b \ll 1$ in the example above.
-But, in most cells, we will be seeing a baseline of ambient contamination (i.e., constant $`y_{it}`$) with some strong upregulation for a few tags with genuinely high abundance.
+But, in most cells, we will be seeing a baseline of ambient contamination (i.e., constant $y_{it}$) with some strong upregulation for a few tags with genuinely high abundance.
 We probably won't be seeing a systematic decrease to zero below the ambient baseline.
 -->
 
@@ -28,13 +28,13 @@ effectively overestimating the size factor.
 
 ## Improving performance at low counts
 
-The "standard" CLR formula for the size factor for cell $i$ is $`\sqrt[n]{\prod_t (y_{it} + 1)}`$.
-This is typically implemented as $`f(z_i) = \exp(z_i)`$ where $`z_i`$ is the mean of $`g(y_{it}) = \log(y_{it} + 1)`$,
+The "standard" CLR formula for the size factor for cell $i$ is $\sqrt[n]{\prod_t (y_{it} + 1)}$.
+This is typically implemented as $f(z_i) = \exp(z_i)$ where $z_i$ is the mean of $g(y_{it}) = \log(y_{it} + 1)$,
 as used by [**Seurat**](https://github.com/satijalab/seurat/blob/1549dcb3075eaeac01c925c4b4bb73c73450fc50/R/preprocessing5.R#L345)
 and [**muon**](https://github.com/scverse/muon/blob/94917d23291f329a19b3c282276c960d414319ad/muon/_prot/preproc.py#L229).
 However, attentive readers will notice that the addition of a pseudo-count means that $f()$ is not the inverse of $g()$.
-Perhaps we should consider defining $`f(z_i) = \exp(z_i) - 1`$ for the sake of symmetry.
-Our modified size factor would then be defined as $`\sqrt[n]{\prod_t (y_{it} + 1)} - 1`$, which we call the "CLRm1" size factor.
+Perhaps we should consider defining $f(z_i) = \exp(z_i) - 1$ for the sake of symmetry.
+Our modified size factor would then be defined as $\sqrt[n]{\prod_t (y_{it} + 1)} - 1$, which we call the "CLRm1" size factor.
 
 Despite its rather _ad hoc_ derivation, the CLRm1 approach works surprisingly well.
 In a simulation with all-background counts, the CLRm1 size factors accurately reflect the true biases,
@@ -58,19 +58,19 @@ Let us consider two cells $k$ and $k'$ that only differ in their counts by some 
 The ideal normalization method would produce a size factor for $k'$ that is $a$-fold larger than that of $k$,
 thus eliminating the scaling difference between the two cells.
 
-- In the case where $`y_{kt}`$ is equal to some constant $`c_k`$ for all $t$, the CLRm1 size factor simplifies to $`(c_k + 1) - 1`$ for $k$ and $`(ac_k + 1) - 1`$ for $k'$.
+- In the case where $y_{kt}$ is equal to some constant $c_k$ for all $t$, the CLRm1 size factor simplifies to $(c_k + 1) - 1$ for $k$ and $(ac_k + 1) - 1$ for $k'$.
   The ratio in the size factors will be equal to $a$.
 - A generalization of the previous point involves approximating the geometric mean with the arithmetic mean.
-  This approximation is satisfactory if the variance in $`y_{kt}`$ is low relative to the mean (see Equation 31 and related discussion in Rodin, 2014).
-  Doing so simplifies the CLRm1 factor to $`n^{-1}\sum_t(y_{kt} + 1) - 1`$ for cell $k$ and $`n^{-1}\sum_t(ay_{kt} + 1) - 1`$ for cell $k'$, again yielding a ratio of $a$.
-- If all $`y_{kt}`$ and $`ay_{kt}`$ are much greater than 1, the addition or subtraction of the pseudo-count can be ignored entirely.
+  This approximation is satisfactory if the variance in $y_{kt}$ is low relative to the mean (see Equation 31 and related discussion in Rodin, 2014).
+  Doing so simplifies the CLRm1 factor to $n^{-1}\sum_t(y_{kt} + 1) - 1$ for cell $k$ and $n^{-1}\sum_t(ay_{kt} + 1) - 1$ for cell $k'$, again yielding a ratio of $a$.
+- If all $y_{kt}$ and $ay_{kt}$ are much greater than 1, the addition or subtraction of the pseudo-count can be ignored entirely.
   The size factors for the two cells cancel out, leaving us with $a$.
-- In the rare case that all $`y_{kt}`$ are much less than 1, we can approximate $`\prod_t (1 + y_{kt}) \approx 1 + \sum_t y_{kt}`$.
-  We can further approximate $`\sqrt[n]{1 + z} \approx 1 + zn^{-1}`$ when $z$ is close to zero.
-  This allows us to obtain a size factor of $`(1 + n^{-1}\sum_t y_{kt}) - 1`$ for $k$ and $`(1 + an^{-1}\sum_t y_{kt}) - 1`$ for $k'$,
+- In the rare case that all $y_{kt}$ are much less than 1, we can approximate $\prod_t (1 + y_{kt}) \approx 1 + \sum_t y_{kt}$.
+  We can further approximate $\sqrt[n]{1 + z} \approx 1 + zn^{-1}$ when $z$ is close to zero.
+  This allows us to obtain a size factor of $(1 + n^{-1}\sum_t y_{kt}) - 1$ for $k$ and $(1 + an^{-1}\sum_t y_{kt}) - 1$ for $k'$,
   which again cancels out to $a$.
 
-This analysis suggests that our approach will deteriorate when $`y_{kt}`$ is highly variable with at least one small/zero value.
+This analysis suggests that our approach will deteriorate when $y_{kt}$ is highly variable with at least one small/zero value.
 Indeed, we see poor performance for a simulation with highly variable background counts:
 
 ![Variable background](simulations/results/bg_variable.png)
@@ -80,7 +80,7 @@ At the very least, users can eliminate unnecessary variability by removing uninf
 Perhaps even more protection could be gained by trimming away the tags with the most extreme average abundances across all cells,
 though this must be weighed against the loss of precision of the size factor estimates when the number of tags is decreased.
 
-Of course, differentially abundant tags will also introduce variation in $`y_{kt}`$.
+Of course, differentially abundant tags will also introduce variation in $y_{kt}$.
 Both the standard method and CLRm1 perform poorly in a simulation with many (up to 10) differentially abundant tags:
 
 ![Even more tags](simulations/results/multi10_tag.png)

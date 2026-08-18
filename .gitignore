@@ -1,3 +1,6 @@
 *.swp
 Checks/
 build/
+docs/latex
+docs/html
+docs/simulations
