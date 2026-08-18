@@ -11,12 +11,12 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // clrm1_cpp
-Rcpp::NumericVector clrm1_cpp(SEXP raw_ptr);
-RcppExport SEXP _clrm1_clrm1_cpp(SEXP raw_ptrSEXP) {
+Rcpp::NumericVector clrm1_cpp(Rcpp::NumericMatrix mat);
+RcppExport SEXP _clrm1_clrm1_cpp(SEXP matSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< SEXP >::type raw_ptr(raw_ptrSEXP);
-    rcpp_result_gen = Rcpp::wrap(clrm1_cpp(raw_ptr));
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type mat(matSEXP);
+    rcpp_result_gen = Rcpp::wrap(clrm1_cpp(mat));
     return rcpp_result_gen;
 END_RCPP
 }

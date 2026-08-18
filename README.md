@@ -100,7 +100,7 @@ Nonetheless, we provide some code for easy vendoring into other applications:
 
 - [Base R](https://github.com/libscran/clrm1/blob/master/package/R/clrm1.R).
 - [R with `DelayedArray` objects](https://github.com/libscran/clrm1/blob/master/package/R/clrm1.R) to avoid copies.
-- [C++](https://github.com/libscran/clrm1/blob/master/package/src/clrm1.hpp) using [**tatami**](https://github.com/tatami-inc/tatami).
+- [C++](https://github.com/libscran/clrm1/blob/master/include/clrm1/clrm1.hpp) using [**tatami**](https://github.com/tatami-inc/tatami).
 
 ## References
 

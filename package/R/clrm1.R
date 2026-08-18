@@ -17,8 +17,8 @@ clrm1.delayed <- function(mat) {
 }
 
 #' @export
-#' @importFrom beachmat initializeCpp
+#' @importFrom Rcpp sourceCpp
 #' @useDynLib clrm1
 clrm1.cpp <- function(mat) {
-    clrm1_cpp(initializeCpp(mat))
+    clrm1_cpp(mat)
 }

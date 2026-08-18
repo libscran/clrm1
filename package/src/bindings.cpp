@@ -1,12 +1,12 @@
-#include "clrm1.hpp"
+#include "clrm1/clrm1.hpp"
 #include "Rcpp.h"
-#include "Rtatami.h"
+#include "tatami/tatami.hpp"
 
 //[[Rcpp::export(rng=false)]]
-Rcpp::NumericVector clrm1_cpp(SEXP raw_ptr) {
-    const Rtatami::BoundNumericPointer ptr(raw_ptr);
-    const auto& mat = *(ptr->ptr);
-    Rcpp::NumericVector output(mat.ncol());
-    clrm1::compute(*(ptr->ptr), clrm1::Options(), static_cast<double*>(output.begin()));
+Rcpp::NumericVector clrm1_cpp(Rcpp::NumericMatrix mat) {
+    const std::size_t NR = mat.nrow(), NC = mat.ncol();
+    tatami::DenseMatrix<double, int, tatami::ArrayView<double> > wrapped(NR, NC, tatami::ArrayView<double>(mat.begin(), NR * NC), false);
+    Rcpp::NumericVector output(NC);
+    clrm1::compute(wrapped, clrm1::Options(), static_cast<double*>(output.begin()));
     return output;
 }

@@ -8,11 +8,8 @@ Description:
     Implements the CLRm1 algorithm in both R and C++, for demonstration purposes.
 Imports:
     Matrix,
-    DelayedArray,
-    beachmat
+    DelayedArray
 LinkingTo:
-    Rcpp,
-    assorthead,
-    beachmat
-RoxygenNote: 7.3.2
+    Rcpp
 Encoding: UTF-8
+Config/roxygen2/version: 8.1.0

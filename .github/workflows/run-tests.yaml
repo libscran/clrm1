@@ -15,14 +15,17 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
+
+    - name: Fetch C++ dependencies
+      run: cmake -S . -B build
 
     - name: Set directories
       run: |
         echo "R_PKG_DIR=${R_HOME}/site-library" >> $GITHUB_ENV
 
     - name: Restore the package directory
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ${{ env.R_PKG_DIR }}
         key: preinstalled-packages
@@ -31,13 +34,6 @@ jobs:
       shell: Rscript {0}
       run: |
         BiocManager::install(c("DelayedArray", "Rcpp", "testthat"))
-
-    - name: Install more dependencies
-      run: |
-        git clone --depth 1 https://github.com/LTLA/assorthead assorthead-pkg
-        R CMD INSTALL assorthead-pkg
-        git clone --depth 1 https://github.com/tatami-inc/beachmat beachmat-pkg
-        R CMD INSTALL beachmat-pkg
 
     - name: Install the test package
       run: R CMD INSTALL package

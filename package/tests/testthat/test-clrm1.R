@@ -1,7 +1,7 @@
 # library(testthat); library(clrm1); source("test-clrm1.R")
 
 set.seed(1000)
-y <- abs(Matrix::rsparsematrix(100, 1000, 0.1))
+y <- matrix(runif(100000), ncol=100)
 
 test_that("basic checks work out", {
     ref <- clrm1(y)

@@ -4,7 +4,9 @@ export(clrm1)
 export(clrm1.cpp)
 export(clrm1.delayed)
 importFrom(DelayedArray,DelayedArray)
-importFrom(Matrix,colMeans)
-importFrom(Matrix,rowSums)
-importFrom(beachmat,initializeCpp)
+importFrom(Matrix,
+  colMeans,
+  rowSums
+)
+importFrom(Rcpp,sourceCpp)
 useDynLib(clrm1)

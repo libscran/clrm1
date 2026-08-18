@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(tatami_tatami 4.1.0 CONFIG)
+find_dependency(tatami_tatami_stats 3.1.0 CONFIG)
+
+include("${CMAKE_CURRENT_LIST_DIR}/libscran_clrm1Targets.cmake")

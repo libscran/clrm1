@@ -1,0 +1,7 @@
+PKG_CPPFLAGS = -I../../include \
+    -I../../build/_deps/auveh-src/include \
+    -I../../build/_deps/quickstats-src/include \
+    -I../../build/_deps/sanisizer-src/include \
+    -I../../build/_deps/subpar-src/include \
+    -I../../build/_deps/tatami-src/include \
+    -I../../build/_deps/tatami_stats-src/include
