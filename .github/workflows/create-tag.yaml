@@ -1,6 +1,6 @@
 on:
   workflow_run:
-    workflows: [Run unit tests]
+    workflows: [Run tests]
     types: [completed]
     branches: [master]
 

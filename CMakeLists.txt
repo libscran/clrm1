@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24)
 
 project(
     clrm1
-    VERSION 0.2.1
+    VERSION 0.2.2
     DESCRIPTION "Centered log-ratio minus 1"
     LANGUAGES CXX
 )
